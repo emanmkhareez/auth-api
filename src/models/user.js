@@ -3,6 +3,7 @@
 const bcrypt=require('bcrypt')
 const jwt = require('jsonwebtoken');
 
+
 const SECRET = process.env.JWT_SECRET || 'super-secret';
 const user = (sequelize, DataTypes) => {
  const model=sequelize.define("users", {
@@ -15,16 +16,34 @@ const user = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    role: {
+      type: DataTypes.ENUM('user', 'writer', 'editor', 'admin'),
+      defaultValue: 'user'
+  },
+  capabilities: {
+      type: DataTypes.VIRTUAL,
+      get() {
+          const acl = {
+              user: ['read'],
+              writer: ['read', 'create'],
+              editor: ['read', 'create', 'update'],
+              admin: ['read', 'create', 'update', 'delete'],
+          };
+          return acl[this.role];
+      }
+  },
+    
+    
     token: {
         type: DataTypes.VIRTUAL,
         get() {
-            return jwt.sign({ username: this.username, test: 'this is a test payload' }, SECRET);
+            return jwt.sign({ username: this.username, test: 'this is a test payload', capabilities:this.capabilities}, SECRET);
         },
         set(tokenObj) { 
             let token = jwt.sign(tokenObj, SECRET);
             return token;
         },
-    
+        
     }
 
   });

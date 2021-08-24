@@ -5,6 +5,7 @@ const router=require('./router/user')
 
 
 
+
 const start=(port)=>{
 app.listen(port,()=>{
     console.log(`server up ${port}`)
@@ -16,6 +17,7 @@ app.get('/', (req, res) => {
 })
 
 app.use(router)
+
 module.exports={
     start,
     app
