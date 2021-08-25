@@ -21,6 +21,7 @@ const {users}=require('../models/index')
 }
 
 
+
 async function siginIn(req,res){
     res.status(200).send(req.user)
 
