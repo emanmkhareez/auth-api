@@ -6,8 +6,6 @@ const Collection = require('./lib/data-collection.js');
 const userModel = require('./users/model.js');
 const noteModel = require('./notes/model.js')
 
-
-
 const DATABASE_URL = process.env.DATABASE_URL 
 const DATABASE_CONFIG = { 
   dialectOptions: {
