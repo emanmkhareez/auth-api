@@ -1,31 +1,39 @@
 'use strict';
-
-const loggerMiddleware = require('../src/middelware/logger');
-
-let consoleSpy;
-let req = {};
-let res = {};
-let next = jest.fn();
-
-beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-})
-
-afterEach(() => {
-    consoleSpy.mockRestore();
-})
-describe('logger middleware', () => {
-    it('should log to the console', () => {
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { Sequelize, DataTypes } = require('sequelize');
+const UsersSchema = require('../src/models/users/model');
+const sequelize = new Sequelize('postgres://qxktbkwk:WSYTE1z5UgRfK3YCcEyx1uP5UUVv1w1f@chunee.db.elephantsql.com/qxktbkwk');
+const Users = UsersSchema(sequelize, DataTypes);
+beforeAll(async () => {
+    await sequelize.sync();
+});
+afterAll( async() => {
+    await  sequelize.drop();
+});
+describe('Bearer Auth', () => {
+    let userInfo = {
+        username: 'Tareq',
+        password: '123'
+    }
+    it('should create a user with a hashed password', async () => {
+        // arrange
+        // act
+        let user = await Users.create(userInfo);
+        let isValid = await bcrypt.compare(userInfo.password, user.password);
+        // assert
+        expect(user.id).toBeTruthy();
+        //check user name and password
+        expect(isValid).toBeTruthy();
+    });
+    it('should attach a teken on find', async () => {
+        //arrange 
         //act
-        loggerMiddleware(req, res, next);
-        //assert
-        expect(consoleSpy).toHaveBeenCalled();
-    })
-
-    it('should move to next middleware', () => {
-        //act
-        loggerMiddleware(req, res, next);
-        //assert
-        expect(next).toHaveBeenCalledWith();
-    })
-})
+        let user = await Users.findOne({ username: userInfo.username});
+        let decodedJwt = jwt.decode(user.token);
+        // assert
+        expect(user.username).toEqual(userInfo.username);
+        expect(user.token).toBeTruthy();
+        expect(decodedJwt.username).toEqual(userInfo.username);
+    });
+});

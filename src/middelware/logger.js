@@ -1,8 +1,11 @@
 'use strict';
 
-module.exports = (req, res, next) => {
-    console.log(`Request LOGGER 📝
-     Request Methode: 👉 " ${req.method} "  
-     & Requset Path: 👉 " ${req.path} " `);
-    next();
-}
+// All middleware has access to the request.
+// Here, we're simply logging out the interesting parts
+
+const logger = (req, res, next) => {
+  console.log('REQUEST:', req.method, req.path);
+  next();
+};
+
+module.exports = logger;
